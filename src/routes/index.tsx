@@ -11,6 +11,7 @@ export default () => {
             <Routes>
                 <Route path="/app" element={<AppShell />}>
                     {/* <Route index element={<CheckIn />} /> */}
+                    <Route index element={<Navigate to="/app/cpf" replace />} />
                     <Route path="cpf" index element={<CheckInCpf />} />
                     <Route path="confirmar/:cpf" element={<CheckInConfirm />} />
                     <Route path="sucesso" element={<CheckInSuccess />} />
