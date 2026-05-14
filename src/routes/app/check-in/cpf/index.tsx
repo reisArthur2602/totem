@@ -25,6 +25,13 @@ export const CheckInCpf = () => {
     }, [timeLeft]);
 
     useEffect(() => {
+        const hasCpfValue = cpf.trim().length > 0;
+
+        if (!hasCpfValue) {
+            setTimeLeft(CPF_TIME_LIMIT_IN_SECONDS);
+            return;
+        }
+
         if (timeLeft <= 0) {
             setCpf('');
             setTimeLeft(CPF_TIME_LIMIT_IN_SECONDS);
@@ -38,7 +45,7 @@ export const CheckInCpf = () => {
         }, 1000);
 
         return () => window.clearTimeout(timer);
-    }, [timeLeft, navigate]);
+    }, [cpf, timeLeft, navigate]);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -57,7 +64,7 @@ export const CheckInCpf = () => {
             />
 
             <motion.div
-                className="flex items-center justify-between gap-4 rounded-2xl  bg-card "
+                className="flex items-center justify-between gap-4 rounded-2xl"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
