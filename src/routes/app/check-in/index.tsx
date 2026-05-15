@@ -17,6 +17,9 @@ export const CheckIn = () => {
 
     const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        if (!cpfIsValid) return;
+
         setLoading(true);
 
         // remover pontuação do cpf
