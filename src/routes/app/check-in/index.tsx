@@ -34,7 +34,7 @@ export const CheckIn = () => {
                 {loading ? (
                     <motion.div
                         key="thinking"
-                        className="min-h-200 flex items-center justify-center "
+                        className="min-h-100 flex items-center justify-center "
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
