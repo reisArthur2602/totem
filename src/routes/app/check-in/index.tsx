@@ -95,7 +95,7 @@ export const CheckIn = () => {
                                             ease: easeInOut,
                                         }}
                                     />
-                                    <Button className="w-full text-2xl font-bold flex items-center justify-center gap-2">
+                                    <Button className="w-full text-2xl font-bold flex items-center justify-center gap-2 relative z-10">
                                         Continuar o atendimento
                                         <ArrowRight className="size-8" />
                                     </Button>
