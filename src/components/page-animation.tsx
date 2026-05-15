@@ -16,7 +16,7 @@ export const PageAnimation = ({ children, delay = 0 }: PageAnimationProps) => {
                 delay,
                 ease: easeInOut,
             }}
-            className="wrapper"
+            className="flex flex-col gap-8 flex-1 "
         >
             {children}
         </motion.div>

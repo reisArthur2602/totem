@@ -118,15 +118,11 @@
         @apply border-border outline-ring/50;
     }
     body {
-        @apply text-foreground min-h-dvh flex antialiased bg-linear-to-bl from-background to-background/98 flex-col;
+        @apply text-foreground antialiased bg-linear-to-b from-background to-background/97 flex-col flex min-h-dvh;
     }
 }
 
 @layer components {
-    .wrapper {
-        @apply flex flex-col gap-8 flex-1;
-    }
-
     .logo-container {
         @apply flex items-center gap-2 cursor-pointer select-none;
     }

@@ -1,33 +1,30 @@
-interface Appointment {
-    id: string;
-    patient: {
-        name: string;
-        cpf: string;
-    };
-    doctor: string;
-    date: string;
-    time: string;
-    location: string;
-    type: string;
-    status: 'confirmed' | 'pending' | 'cancelled';
+import { axiosConnection } from '../lib/axios';
+
+interface AppointmentResponse {
+    ok: boolean;
+    cpf: string;
+    total: number;
+    dados?: Appointment[];
+    mensagem?: string;
 }
 
-export const getAppointmentByCpf = async (cpf: string): Promise<Appointment> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+export const getAppointmentByCpf = async (cpf: string): Promise<AppointmentResponse> => {
+    const today = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 7);
 
-    const mockData: Appointment = {
-        id: '12345',
-        patient: {
-            name: 'Arthur de Souza Reis Costa',
-            cpf,
-        },
-        doctor: 'Teste',
-        date: '13/05/2026',
-        time: '15:30',
-        location: 'Clínica Central',
-        type: 'Consulta de Rotina',
-        status: 'confirmed',
-    };
+    const dataInicial = today.toISOString().split('T')[0];
+    const dataFinal = futureDate.toISOString().split('T')[0];
 
-    return mockData;
+    const { data } = await axiosConnection.post<AppointmentResponse>(
+        '/api/agenda/listaagendamentoporcpf',
+        {
+            cpfPaciente: cpf,
+            dataInicial,
+            dataFinal,
+            idLocal: 2,
+        }
+    );
+
+    return data;
 };

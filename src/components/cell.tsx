@@ -22,8 +22,10 @@ export const Cell = ({ title, value, icon: Icon, index = 0 }: CellProps) => {
         >
             <Icon className="size-6 text-primary shrink-0 mt-1" />
             <div>
-                <p className="text-sm text-muted-foreground ">{title}</p>
-                <p className="text-xl font-semibold text-primary-foreground">{value}</p>
+                <p className="text-sm text-muted-foreground">{title}</p>
+                <p className="text-xl font-semibold text-primary-foreground capitalize">
+                    {value}
+                </p>
             </div>
         </motion.div>
     );

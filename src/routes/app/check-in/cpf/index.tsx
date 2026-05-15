@@ -1,42 +1,28 @@
 import { motion } from 'framer-motion';
-import { Clock, User } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { AlertCircle, Clock, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Cell } from '../../../../components/cell';
 import { Headline } from '../../../../components/headline';
 import { PageAnimation } from '../../../../components/page-animation';
 import { Button } from '../../../../components/ui/button';
-import { formatCpf, isValidCpf } from '../../../../helpers/cpf';
+import { useAppointmentStore } from '../../../../stores/appointment';
 
-const CPF_TIME_LIMIT_IN_SECONDS = 30;
+const CONFIRMATION_TIME = 30;
 
-export const CheckInCpf = () => {
-    const [cpf, setCpf] = useState('');
-    const [timeLeft, setTimeLeft] = useState(CPF_TIME_LIMIT_IN_SECONDS);
-
+export const CheckInCPF = () => {
     const navigate = useNavigate();
+    const [timeLeft, setTimeLeft] = useState(CONFIRMATION_TIME);
 
-    const cpfIsValid = isValidCpf(cpf);
-
-    const formattedTimeLeft = useMemo(() => {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }, [timeLeft]);
+    const { appointments } = useAppointmentStore();
 
     useEffect(() => {
-        const hasCpfValue = cpf.trim().length > 0;
+        if (appointments.length === 0) navigate('/app', { replace: true });
+    }, [appointments, navigate]);
 
-        if (!hasCpfValue) {
-            setTimeLeft(CPF_TIME_LIMIT_IN_SECONDS);
-            return;
-        }
-
+    useEffect(() => {
         if (timeLeft <= 0) {
-            setCpf('');
-            setTimeLeft(CPF_TIME_LIMIT_IN_SECONDS);
-
-            navigate('/app/cpf', { replace: true });
+            navigate('/app', { replace: true });
             return;
         }
 
@@ -45,71 +31,147 @@ export const CheckInCpf = () => {
         }, 1000);
 
         return () => window.clearTimeout(timer);
-    }, [cpf, timeLeft, navigate]);
+    }, [timeLeft, navigate]);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    if (appointments.length === 0) {
+        return null;
+    }
 
-        if (cpfIsValid) {
-            navigate(`/app/confirmar/${cpf}`, { replace: true });
-        }
+    const appointmentData = appointments[0];
+
+    const [day, month, year] = appointmentData.dataMarcada.split('-');
+
+    const appointment = {
+        patient: {
+            name: appointmentData.nomePaciente,
+            cpf: appointmentData.cpf,
+        },
+        doctor: appointmentData.nomeMedico,
+        date: `${day}/${month}/${year}`,
+        time: appointmentData.horaMarcada,
+        location: appointmentData.localAtendimento,
+        type: appointmentData.TipoAtendimento,
+        status: 'confirmed',
     };
+
+    const canConfirm = (() => {
+        const [day, month, year] = appointment.date.split('/');
+        const [hours, minutes] = appointment.time.split(':');
+        const appointmentTime = new Date(
+            parseInt(year),
+            parseInt(month) - 1,
+            parseInt(day),
+            parseInt(hours),
+            parseInt(minutes)
+        );
+        const fifteenMinutesBefore = new Date(appointmentTime.getTime() - 15 * 60000);
+        const now = new Date();
+        return now >= fifteenMinutesBefore && now <= appointmentTime;
+    })();
+
+    const cellData = [
+        { title: 'Paciente', value: appointment.patient.name.toLocaleLowerCase(), icon: User },
+        {
+            title: 'Agendamento',
+            value: `${appointment.time}`,
+            icon: Clock,
+        },
+        { title: 'Profissional', value: appointment.doctor.toLocaleLowerCase(), icon: User },
+    ];
 
     return (
         <PageAnimation>
             <Headline
-                icon={User}
-                title="Digite o seu CPF"
-                subtitle="Informe seu CPF para localizar seu cadastro e continuar o atendimento."
+                title="Confirme sua chegada"
+                subtitle="Verifique os seus dados e confirme sua presença"
             />
 
             <motion.div
-                className="flex items-center justify-between gap-4 rounded-2xl"
-                initial={{ opacity: 0, y: 12 }}
+                className="space-y-2"
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
             >
-                <div className="flex items-center gap-3 text-muted-foreground">
-                    <Clock className="size-6 text-primary" />
-                    <span>Tempo para preencher</span>
+                <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-semibold text-muted-foreground">
+                        Tempo para confirmar
+                    </span>
+                    <span className={`text-lg font-bold ${
+                        timeLeft <= 10 ? 'text-destructive' :
+                        timeLeft <= 15 ? 'text-yellow-500' :
+                        'text-primary'
+                    }`}>
+                        {timeLeft}s
+                    </span>
                 </div>
-
-                <strong className="text-2xl font-bold text-foreground">{formattedTimeLeft}</strong>
+                <motion.div
+                    className="h-3 bg-muted rounded-full overflow-hidden"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <motion.div
+                        className={`h-full rounded-full ${
+                            timeLeft <= 10 ? 'bg-destructive' :
+                            timeLeft <= 15 ? 'bg-yellow-500' :
+                            'bg-primary'
+                        }`}
+                        initial={{ width: '100%' }}
+                        animate={{ width: `${(timeLeft / CONFIRMATION_TIME) * 100}%` }}
+                        transition={{ duration: 0.3 }}
+                    />
+                </motion.div>
             </motion.div>
 
-            <motion.form
-                onSubmit={handleSubmit}
-                className="flex flex-col gap-4"
+            <motion.div
+                className="bg-card rounded-2xl p-6 space-y-4 border"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
             >
-                <motion.input
-                    className="rounded-2xl border bg-card px-5 py-6 text-center text-4xl text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
-                    placeholder="999.999.999-99"
-                    value={cpf}
-                    onChange={(e) => setCpf(formatCpf(e.target.value))}
-                    inputMode="numeric"
-                    maxLength={14}
-                    autoFocus
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4, delay: 0.4 }}
-                    whileFocus={{ scale: 1.02 }}
-                />
+                {cellData.map((cell, index) => (
+                    <Cell
+                        key={cell.value}
+                        value={cell.value}
+                        icon={cell.icon}
+                        title={cell.title}
+                        index={index}
+                    />
+                ))}
+            </motion.div>
 
-                {cpfIsValid && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.5 }}
-                    >
-                        <Button variant="primary" className="w-full">
-                            Realizar Consulta
-                        </Button>
-                    </motion.div>
-                )}
-            </motion.form>
+            {!canConfirm && (
+                <motion.div
+                    className="flex gap-2 border rounded-xl p-4 items-start bg-card text-primary-foreground"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                >
+                    <AlertCircle className="size-6 " />
+                    <p>
+                        Você poderá confirmar sua presença apenas a partir de 20 minutos antes da
+                        consulta.
+                    </p>
+                </motion.div>
+            )}
+
+            <motion.div
+                className="flex gap-3"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.6 }}
+            >
+                <Button variant="secondary" className="flex-1" onClick={() => navigate('/')}>
+                    Voltar
+                </Button>
+                <Button
+                    variant="primary"
+                    className="flex-1"
+                    onClick={() => navigate('/app/sucesso', { replace: true })}
+                >
+                    Confirmar
+                </Button>
+            </motion.div>
         </PageAnimation>
     );
 };
