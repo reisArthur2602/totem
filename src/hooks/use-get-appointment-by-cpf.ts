@@ -21,13 +21,13 @@ export const useGetAppointmentByCpf = () => {
             return response;
         },
         onSuccess: (data) => {
-            setAppointments(data.dados);
+            setAppointments(data.dados ?? []);
             navigate('/app/cpf', { replace: true });
         },
 
         onError: (error) => {
             const message =
-                error instanceof AxiosError
+                error instanceof AxiosError && error.response?.data?.mensagem
                     ? error.response.data.mensagem
                     : 'Erro ao buscar agendamento';
             toast.error(message);
