@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, easeInOut, motion } from 'framer-motion';
 import { ArrowRight, User } from 'lucide-react';
 import { useState, type SubmitEvent } from 'react';
 import { AiThinking } from '../../../components/ai-thinking';
@@ -58,13 +58,13 @@ export const CheckIn = () => {
 
                         <motion.form
                             onSubmit={handleSubmit}
-                            className="flex flex-col gap-8"
+                            className="flex flex-col gap-4"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.3 }}
                         >
                             <motion.input
-                                className="rounded-3xl border-2 border-primary bg-card px-8 py-8 text-center text-6xl text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/30"
+                                className="rounded-2xl border-2 border-primary bg-card p-6 text-center text-4xl text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/30"
                                 placeholder="999.999.999-99"
                                 value={cpf}
                                 onChange={(e) => setCpf(formatCpf(e.target.value))}
@@ -92,10 +92,10 @@ export const CheckIn = () => {
                                         transition={{
                                             duration: 2,
                                             repeat: Infinity,
-                                            ease: 'easeInOut',
+                                            ease: easeInOut,
                                         }}
                                     />
-                                    <Button className="w-full py-7 text-2xl font-bold flex items-center justify-center gap-3 relative z-10">
+                                    <Button className="w-full text-2xl font-bold flex items-center justify-center gap-2">
                                         Continuar o atendimento
                                         <ArrowRight className="size-8" />
                                     </Button>
